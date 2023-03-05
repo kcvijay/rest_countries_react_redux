@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import axios from "axios";
 
 import loader from "../assets/loader.gif";
@@ -20,29 +20,110 @@ const SingleCountry = () => {
       });
   }, [params]);
 
-  console.log(country);
+  const clickBorderHandler = (el) => {
+    nav(`/${el}`, { replace: false });
+  };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center m-16">
-        <img src={loader} alt="Loader animation" />
+        <img className="backdrop" src={loader} alt="Loader animation" />
       </div>
     );
   }
   return (
     <div className="max-w-[1200px] my-16 mx-auto">
-      <div>
+      <div className="flex justify-between">
         <button
           onClick={() => nav(-1)}
           className="border py-2 px-4 rounded-md shadow-md hover:bg-sky-400 hover:text-white duration-300"
         >
           &larr;&nbsp;Back
         </button>
+        <button
+          className="border py-2 px-4 rounded-md shadow-md hover:bg-sky-400 hover:text-white duration-300"
+          onClick={() => nav("/")}
+        >
+          Home
+        </button>
       </div>
-      <div className="grid md:grid-cols-3 mt-8">
-        <img src={country.flags?.svg} alt="" />
-        <div>Details</div>
-        <div>Weather</div>
+      <div className="grid lg:grid-cols-3 mt-8">
+        <figure>
+          <img
+            className="rounded-md shadow-md h-[240px] w-[350px] object-cover"
+            src={country[0]?.flags?.svg}
+            alt={`Flag of ${country[0]?.name?.common}`}
+          />
+          <h2 className="text-2xl font-bold mt-4">
+            {country[0]?.name?.common}
+          </h2>
+          <p className="text-xl text-slate-400">{country[0]?.name?.official}</p>
+        </figure>
+
+        <div>
+          <ul>
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Continent:
+              </span>
+              {country[0]?.continents[0]}
+            </li>
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Capital:
+              </span>
+              {country[0]?.capital || "***"}
+            </li>
+
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Population:
+              </span>
+              {country[0]?.population.toLocaleString()}
+            </li>
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Currency/ies:
+              </span>
+              <span className="overflow-x-scroll">
+                {country[0]?.currencies
+                  ? Object.values(country[0]?.currencies)
+                      .map((el) => el.name)
+                      .join(", ")
+                  : "***"}
+              </span>
+            </li>
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Language/s:
+              </span>
+              {country[0]?.languages
+                ? Object.values(country[0]?.languages)
+                    .map((el) => el)
+                    .join(", ")
+                : "***"}
+            </li>
+            <li>
+              <span className="inline-block w-[160px] font-bold mb-3">
+                Border countries:
+              </span>
+              <div className="flex flex-wrap justify-start items-center">
+                {country[0]?.borders
+                  ? country[0]?.borders?.map((el) => (
+                      <span
+                        onClick={() => clickBorderHandler(el)}
+                        key={el}
+                        className="bg-sky-500 px-4 py-2 text-white my-2 mr-2 rounded-md shadow-md cursor-pointer text-wrap hover:bg-white hover:text-sky-500 active:shadow-none duration-300"
+                      >
+                        {el}
+                      </span>
+                    ))
+                  : "***"}
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div className="bg-red-400">Weather</div>
       </div>
     </div>
   );

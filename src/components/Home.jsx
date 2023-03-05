@@ -29,9 +29,9 @@ const Home = () => {
 
   const allCountries = filteredCountries
     .sort((a, b) => {
-      return a.name.common.toLowerCase() < b.name.common.toLowerCase()
+      return a.name.common.toUpperCase() < b.name.common.toUpperCase()
         ? -1
-        : a.name.common.toLowerCase() > b.name.common.toLowerCase()
+        : a.name.common.toUpperCase() > b.name.common.toUpperCase()
         ? 1
         : 0;
     })
@@ -67,7 +67,7 @@ const Home = () => {
           name="search"
           placeholder="search.."
           autoComplete="off"
-          className="p-2 w-full md:w-[300px] mx-4 selection:border rounded-md focus:outline-sky-400"
+          className="p-2 w-full md:w-[500px] mx-4 border rounded-md shadow-md focus:outline-slate-100 focus:shadow-none duration-300"
           onChange={changeHandler}
         />
       </form>
