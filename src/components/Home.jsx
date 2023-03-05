@@ -7,39 +7,73 @@ import loader from "../assets/loader.gif";
 const Home = () => {
   const [countries, setCountries] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [search, setSearch] = useState({ search: "" });
 
   useEffect(() => {
     setIsLoading(true);
     axios.get("https://restcountries.com/v3.1/all").then((res) => {
       setCountries(res.data);
+      setIsLoading(false);
     });
-    setIsLoading(false);
   }, []);
 
-  const allCountries = countries.map((country) => {
-    return (
-      <CountryCard
-        name={country.name.common}
-        flag={country.flags.svg}
-        officialName={country.name.official || "***"}
-        population={country.population.toLocaleString()}
-        capital={country.capital || "***"}
-        continent={country.continents[0]}
-      />
-    );
+  const changeHandler = (e) => {
+    setSearch({ ...search, [e.target.name]: e.target.value });
+  };
+
+  console.log(countries);
+
+  const filteredCountries = countries.filter((el) => {
+    return el.name.common.toLowerCase().includes(search.search.toLowerCase());
   });
+
+  const allCountries = filteredCountries
+    .sort((a, b) => {
+      return a.name.common.toLowerCase() < b.name.common.toLowerCase()
+        ? -1
+        : a.name.common.toLowerCase() > b.name.common.toLowerCase()
+        ? 1
+        : 0;
+    })
+    .map((country) => {
+      return (
+        <CountryCard
+          key={country.name.common}
+          cca3={country.cca3}
+          name={country.name.common}
+          flag={country.flags.svg}
+          officialName={country.name.official || "***"}
+          population={country.population.toLocaleString()}
+          capital={country.capital || "***"}
+          continent={country.continents[0]}
+        />
+      );
+    });
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center">
+      <div className="flex justify-center items-center m-16">
         <img src={loader} alt="Loader animation" />
       </div>
     );
   }
 
   return (
-    <div className="mx-8 my-16 flex justify-center content-center flex-wrap gap-8">
-      {allCountries}
+    <div>
+      <form className="mt-16 flex justify-center">
+        <input
+          type="search"
+          id="search"
+          name="search"
+          placeholder="search.."
+          autoComplete="off"
+          className="p-2 w-full md:w-[300px] mx-4 selection:border rounded-md focus:outline-sky-400"
+          onChange={changeHandler}
+        />
+      </form>
+      <div className="mx-8 my-16 flex justify-center content-center flex-wrap gap-8 -z-10">
+        {allCountries}
+      </div>
     </div>
   );
 };
