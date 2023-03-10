@@ -58,7 +58,7 @@ const SingleCountry = () => {
   useEffect(() => {
     axios
       .get(
-        `https://api.openweathermap.org/data/2.5/weather?q=${country.capital}&appid=${process.env.REACT_APP_APP_ID}`
+        `https://api.openweathermap.org/data/2.5/weather?q=${country.capital}&appid=${appid}
       )
       .then((res) =>
         setWeather({

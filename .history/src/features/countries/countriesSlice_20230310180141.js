@@ -22,21 +22,15 @@ export const countriesSlice = createSlice({
     },
 
     extraReducers: (builder) => {
-      builder
-        .addCase(allCountries.pending, (state) => {
-          state.loading = true;
-        })
-        .addCase(allCountries.fulfilled, (state, action) => {
-          state.loading = false;
-          state.countriesData = action.payload;
-          state.success = true;
-        })
-        .addCase(allCountries.rejected, (state, action) => {
-          state.loading = false;
-          state.error = true;
-          state.message = action.payload;
-          state.countriesData = [];
-        });
+      builder.addCase(allCountries.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(allCountries.fulfilled, (state.action) => {
+        state.loading = false;
+        state.countriesData =action.payload;
+        state.success = true;
+      })
+      .addCase
     },
   },
 });

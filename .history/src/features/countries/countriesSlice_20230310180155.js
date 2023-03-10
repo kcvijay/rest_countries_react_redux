@@ -31,12 +31,7 @@ export const countriesSlice = createSlice({
           state.countriesData = action.payload;
           state.success = true;
         })
-        .addCase(allCountries.rejected, (state, action) => {
-          state.loading = false;
-          state.error = true;
-          state.message = action.payload;
-          state.countriesData = [];
-        });
+        .addCase(allCountries.rejected);
     },
   },
 });

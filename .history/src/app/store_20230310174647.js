@@ -3,6 +3,6 @@ import countriesReducer from "../features/countries/countriesSlice";
 
 export default configureStore({
   reducer: {
-    countries: countriesReducer,
+    countries: 
   },
 });
