@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-
-import { showSingleCountry } from "../features/countries/countryAction";
-import { getWeather } from "../features/countries/weatherAction";
+import axios from "axios";
 
 import loader from "../assets/loader.gif";
 import Weather from "./Weather";
@@ -11,62 +8,89 @@ import Weather from "./Weather";
 const SingleCountry = () => {
   const params = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const country = useSelector((state) => state.countries.countryData);
-  const weather = useSelector((state) => state.countries.weatherData);
-  const loading = useSelector((state) => state.countries.loading);
-  const success = useSelector((state) => state.countries.success);
-
-  const [capitalCity, setCapitalCity] = useState();
-
-  useEffect(() => {
-    dispatch(showSingleCountry(params.singlecountry));
-  }, [dispatch, params, success]);
-
-  useEffect(() => {
-    const capital = country[0]?.capital[0];
-    setCapitalCity(capital);
-
-  }, [country]);
-
-  useEffect(() => {
-    if (capitalCity) {
-      dispatch(getWeather(capitalCity));
-    }
-  }, [dispatch, capitalCity]);
+  const [country, setCountry] = useState({
+    officialName: "",
+    commonName: "",
+    continents: "",
+    flag: "",
+    population: "",
+    capital: "",
+    currencies: "",
+    languages: "",
+    borders: [],
+  });
+  const [weather, setWeather] = useState({
+    temp: "",
+    tempMin: "",
+    tempMax: "",
+    icon: "",
+    condition: "",
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const pageRedirectHandler = (el) => {
     return navigate(`/${el}`, { replace: false });
   };
 
-  if (loading) {
+  useEffect(() => {
+    setIsLoading(true);
+
+    axios
+      .get(`https://restcountries.com/v3.1/alpha?codes=${params.singlecountry}`)
+      .then((res) => {
+        setCountry({
+          ...country,
+          officialName: res.data[0]?.name?.official,
+          commonName: res.data[0]?.name?.common,
+          continents: res.data[0]?.continents,
+          flag: res.data[0]?.flags?.svg,
+          population: res.data[0]?.population,
+          capital: res.data[0]?.capital || res.data[0]?.name.common,
+          currencies: res.data[0]?.currencies,
+          languages: res.data[0]?.languages,
+          borders: res.data[0]?.borders,
+        });
+        setIsLoading(false);
+      });
+  }, [params]);
+
+  useEffect(() => {
+    axios
+      .get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${country.capital}&appid=${process.env.REACT_APP_APP_ID}
+      )
+      .then((res) =>
+        setWeather({
+          ...weather,
+          temp: res.data?.main?.temp || "-",
+          tempMin: res.data?.main?.temp_min || "-",
+          tempMax: res.data?.main?.temp_max || "-",
+          condition: res.data?.weather[0]?.description || "-",
+          icon: res.data?.weather[0]?.icon || "-",
+        })
+      );
+  }, [country]);
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center m-16">
         <img className="backdrop" src={loader} alt="Loader animation" />
       </div>
     );
   }
-
-  console.log(country);
-
   return (
     <div className="max-w-[1200px] my-16 mx-auto">
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8 mx-8">
         <figure>
           <img
-            className="shadow-md max-h-[220px] w-full object-cover"
-            src={country[0]?.flags?.svg}
-            alt={country[0]?.name?.common}
+            className="shadow-md max-h-[220px] max-w-[320px] "
+            src={country.flag}
+            alt={`Flag of ${country.commonName}`}
           />
           <div className="mt-4">
-            <h2 className="text-2xl font-bold">{country[0]?.name?.common}</h2>
-            <p className="text-xl text-slate-400">
-              {country[0]?.name?.official}
-            </p>
-            <p className="italic text-sky-500 text-xl">
-              {Object.values(country[0]?.name?.nativeName)[0]?.official}
-            </p>
+            <h2 className="text-2xl font-bold">{country.commonName}</h2>
+            <p className="text-xl text-slate-400">{country.officialName}</p>
           </div>
         </figure>
 
@@ -76,28 +100,28 @@ const SingleCountry = () => {
               <span className="inline-block w-[160px] font-bold mb-3">
                 Continent:
               </span>
-              {country[0]?.continents}
+              {country.continents}
             </li>
             <li>
               <span className="inline-block w-[160px] font-bold mb-3">
                 Capital:
               </span>
-              {country[0]?.capital || country[0]?.name.common}
+              {country.capital || "***"}
             </li>
 
             <li>
               <span className="inline-block w-[160px] font-bold mb-3">
                 Population:
               </span>
-              {country[0]?.population.toLocaleString()}
+              {country.population.toLocaleString()}
             </li>
             <li>
               <span className="inline-block w-[160px] font-bold mb-3">
                 Currency/ies:
               </span>
               <span className="overflow-x-scroll">
-                {country[0]?.currencies
-                  ? Object.values(country[0]?.currencies)
+                {country.currencies
+                  ? Object.values(country.currencies)
                       .map((el) => el.name)
                       .join(", ")
                   : "***"}
@@ -107,31 +131,25 @@ const SingleCountry = () => {
               <span className="inline-block w-[160px] font-bold mb-3">
                 Language/s:
               </span>
-              {country[0]?.languages
-                ? Object.values(country[0]?.languages)
+              {country.languages
+                ? Object.values(country.languages)
                     .map((el) => el)
                     .join(", ")
                 : "***"}
             </li>
             <li>
               <span className="inline-block w-[160px] font-bold mb-3">
-                Top-Level Domain:
-              </span>
-              {country[0]?.tld[0]}
-            </li>
-            <li>
-              <span className="inline-block w-[160px] font-bold mb-3">
                 Border countries:
               </span>
               <div className="flex flex-wrap justify-start items-center">
-                {country[0]?.borders
-                  ? country[0]?.borders.map((border) => (
+                {country.borders
+                  ? country.borders?.map((el) => (
                       <span
-                        onClick={() => pageRedirectHandler(border)}
-                        key={border}
+                        onClick={() => pageRedirectHandler(el)}
+                        key={el}
                         className="bg-sky-500 px-4 py-2 text-white my-2 mr-2 rounded-md shadow-md cursor-pointer text-wrap hover:bg-white hover:text-sky-500 active:shadow-none duration-300"
                       >
-                        {border}
+                        {el}
                       </span>
                     ))
                   : "***"}
@@ -139,25 +157,14 @@ const SingleCountry = () => {
             </li>
           </ul>
         </div>
-
         <Weather
-          name={country[0]?.name.common}
-          capital={capitalCity}
-          temp={
-            weather?.main?.temp
-              ? (weather?.main?.temp - 273.15).toFixed(0)
-              : "_"
-          }
-          tempMin={
-            weather?.main?.temp_min
-              ? (weather?.main?.temp_min - 273.15).toFixed(0)
-              : "_"
-          }
-          tempMax={
-            weather?.main?.temp_max
-              ? (weather?.main?.temp_max - 273.15).toFixed(0)
-              : "_"
-          }
+          name={country.commonName}
+          capital={country.capital}
+          temp={weather.temp ? (weather.temp - 273.15).toFixed(0) : "_"}
+          tempMin={weather.temp ? (weather.tempMin - 273.15).toFixed(0) : "_"}
+          tempMax={weather.temp ? (weather.tempMax - 273.15).toFixed(0) : "_"}
+          condition={weather.condition}
+          icon={weather.icon}
         />
       </div>
       <div className="flex justify-between mt-24">
