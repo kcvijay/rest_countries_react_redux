@@ -3,17 +3,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 // All countries
 
-export const allCountries = createAsyncThunk(
-  "countries/showAll",
-  async (_, thunkAPI) => {
-    try {
-      const response = await axios.get("https://restcountries.com/v3.1/all");
-      return response.data;
-    } catch (err) {
-      const message = (err.response && err.response.data) || err.message;
 
-      // Reject with value sends the error message as payload.
-      return thunkAPI.rejectWithValue(message);
-    }
+export const showAllCountries = createAsyncThunk(
+  "countries/showOne",
+  async () => {
+    const response = await axios.get(`https://restcountries.com/v3.1/all`, {});
+    return response.data;
   }
 );

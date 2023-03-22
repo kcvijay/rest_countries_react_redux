@@ -1,0 +1,23 @@
+import { getWeather } from "./weatherAction";
+import { createSlice } from "@reduxjs/toolkit";
+
+const initialState = {
+  loading: true,
+  success: false,
+  weatherData: [],
+};
+
+export const weatherSlice = createSlice({
+  name: "weather",
+  initialState: initialState,
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(getWeather.fulfilled, (state, action) => {
+      state.loading = false;
+      state.weatherData = action.payload;
+      state.success = true;
+    });
+  },
+});
+
+export default weatherSlice.reducer;
